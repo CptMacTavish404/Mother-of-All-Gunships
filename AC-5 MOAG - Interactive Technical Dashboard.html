@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AC-5 MOAG: Interactive Technical Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body
+        {
+            background-color: #F8F7F4;
+            color: #333D44;
+            font-family: 'Source Sans 3', sans-serif;
+        }
+        h1, h2, h3, h4, .font-slab
+        {
+            font-family: 'Roboto Slab', serif;
+        }
+        .chart-container
+        {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px)
+        {
+            .chart-container
+            {
+                height: 400px;
+            }
+        }
+        .nav-link
+        {
+            transition: color 0.3s ease, border-bottom-color 0.3s ease;
+        }
+        .nav-link:hover, .nav-link.active
+        {
+            color: #0E4B8C;
+            border-bottom-color: #0E4B8C;
+        }
+        .filter-btn
+        {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .filter-btn.active
+        {
+            background-color: #0E4B8C;
+            color: #FFFFFF;
+        }
+        .llm-button
+        {
+            background-color: #5A7D9A;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 9999px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        .llm-button:hover
+        {
+            background-color: #0E4B8C;
+        }
+        .llm-button:disabled
+        {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .loader
+        {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #0E4B8C;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+        @keyframes spin
+        {
+            0%
+            {
+                transform: rotate(0deg);
+            }
+            100%
+            {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="header" class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <div class="container mx-auto px-4">
+            <nav class="flex justify-between items-center py-4">
+                <h1 class="text-2xl font-bold text-gray-800">AC-5 MOAG</h1>
+                <div class="hidden md:flex space-x-6">
+                    <a href="#overview" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">Overview</a>
+                    <a href="#direct-fire" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">Direct Fire</a>
+                    <a href="#guided-munitions" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">Guided Munitions</a>
+                    <a href="#challenges" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">Challenges</a>
+                    <a href="#performance" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">Performance</a>
+                    <a href="#strategy" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">Strategy</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+        
+        <section class="text-center my-12 md:my-20">
+            <h2 class="text-4xl md:text-6xl font-bold text-gray-900">The "Mother of All Gunships"</h2>
+            <p class="mt-4 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">An interactive analysis of the hypothetical AC-5 MOAG, a conceptual weapons platform built upon the colossal C-5M Super Galaxy airframe.</p>
+        </section>
+
+        <section id="overview" class="mb-20">
+            <h3 class="text-3xl font-bold text-center mb-2">The Foundation: C-5M Super Galaxy</h3>
+            <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">The AC-5 concept is built upon the C-5M Super Galaxy, the largest strategic airlifter in the USAF. Its immense size, payload, and power are the critical enablers for creating such an extreme combat platform. These baseline characteristics define both its potential and its limitations.</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 text-center">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-4xl font-bold text-[#0E4B8C]">281,000</p>
+                    <p class="text-sm text-gray-500 mt-1">Max Payload (lbs)</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-4xl font-bold text-[#0E4B8C]">204,000</p>
+                    <p class="text-sm text-gray-500 mt-1">Total Engine Thrust (lbf)</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-4xl font-bold text-[#0E4B8C]">222 <span class="text-2xl">ft</span></p>
+                    <p class="text-sm text-gray-500 mt-1">Wingspan</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-4xl font-bold text-[#0E4B8C]">840,000</p>
+                    <p class="text-sm text-gray-500 mt-1">Max Takeoff Weight (lbs)</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="direct-fire" class="mb-20">
+            <h3 class="text-3xl font-bold text-center mb-2">The Arsenal I: Direct-Fire Dominance</h3>
+            <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">The core of the MOAG's ground-attack capability lies in a devastating array of cannons and howitzers. This interactive chart allows you to compare the key characteristics of these weapon systems. Click the buttons to filter by category and see how they stack up.</p>
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="flex justify-center space-x-2 mb-6">
+                    <button class="filter-btn active px-4 py-2 rounded-full text-sm font-semibold bg-gray-200" data-filter="rof" data-weapon-category="Gatling Cannons" data-weapon-name="M61 Vulcan" data-weapon-detail="6600 rounds/minute">Rate of Fire</button>
+                    <button class="filter-btn px-4 py-2 rounded-full text-sm font-semibold bg-gray-200" data-filter="recoil" data-weapon-category="Heavy Cannons" data-weapon-name="GAU-8/A Avenger" data-weapon-detail="10,000 lbs recoil">Recoil Force</button>
+                </div>
+                <div class="chart-container">
+                    <canvas id="directFireChart"></canvas>
+                </div>
+                 <div id="directFireInfo" class="mt-4 text-sm text-gray-700 max-w-3xl mx-auto text-center">
+                    <p>This chart visualizes the maximum cyclic rate of fire for the Gatling-style weapons. The M61 Vulcan and GAU-2/A Minigun provide overwhelming suppressive fire, while the GAU-8/A Avenger combines a high rate of fire with powerful 30mm anti-armor rounds.</p>
+                </div>
+                <div class="flex justify-center mt-6">
+                    <button id="generateDirectFireInsight" class="llm-button">Generate Tactical Insight ✨</button>
+                </div>
+                <div id="directFireInsight" class="mt-4 p-4 bg-gray-100 rounded-lg text-gray-700 text-center italic hidden">
+                    <span id="directFireInsightText"></span>
+                    <div id="directFireLoader" class="loader mx-auto mt-2 hidden"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="guided-munitions" class="mb-20">
+            <h3 class="text-3xl font-bold text-center mb-2">The Arsenal II: Standoff & Precision</h3>
+            <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">Beyond direct-fire weapons, the AC-5's true strategic value comes from its ability to deploy a massive payload of guided munitions from standoff ranges. This capability transforms it from a gunship into a versatile "arsenal plane," able to strike targets from well outside enemy air defense range.</p>
+             <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="chart-container">
+                    <canvas id="guidedMunitionsChart"></canvas>
+                </div>
+                 <p class="mt-4 text-sm text-gray-700 max-w-3xl mx-auto text-center">
+                    This chart compares the maximum operational range of key standoff munitions. The integration of the Rapid Dragon system, capable of launching cruise missiles like the JASSM-ER, grants the AC-5 a strategic strike capability measured in hundreds of kilometers, a fundamental shift from traditional gunship roles.
+                 </p>
+                 <div class="flex justify-center mt-6">
+                    <button id="generateGuidedInsight" class="llm-button" data-weapon-category="Standoff Missile System" data-weapon-name="Rapid Dragon (JASSM-ER)" data-weapon-detail="925 km range">Generate Strategic Scenario ✨</button>
+                </div>
+                <div id="guidedInsight" class="mt-4 p-4 bg-gray-100 rounded-lg text-gray-700 text-center italic hidden">
+                    <span id="guidedInsightText"></span>
+                    <div id="guidedLoader" class="loader mx-auto mt-2 hidden"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="challenges" class="mb-20">
+            <h3 class="text-3xl font-bold text-center mb-2">The Engineering Nightmare: Core Challenges</h3>
+            <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">Transforming a strategic airlifter into a combat platform of this magnitude is not merely a matter of installation. It presents profound engineering challenges that would require groundbreaking solutions to overcome.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="text-4xl text-[#0E4B8C] mb-3">🛠️</div>
+                    <h4 class="font-bold text-lg mb-2">Recoil & Structure</h4>
+                    <p class="text-sm text-gray-600">The C-5 airframe was not designed for the immense, repeated stress from multiple cannons firing simultaneously. Extensive structural reinforcement and active recoil compensation systems would be critical to prevent catastrophic failure.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="text-4xl text-[#0E4B8C] mb-3">⚡️</div>
+                    <h4 class="font-bold text-lg mb-2">Power Generation</h4>
+                    <p class="text-sm text-gray-600">The array of externally-powered Gatling guns demands a massive electrical output, far exceeding a transport's needs. This would require dedicated high-capacity generators and a complete overhaul of the power distribution system.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="text-4xl text-[#0E4B8C] mb-3">🌡️</div>
+                    <h4 class="font-bold text-lg mb-2">Thermal Management</h4>
+                    <p class="text-sm text-gray-600">Sustained firing generates extreme heat. Advanced cooling systems for the weapons and safe venting of hot exhaust gases are crucial to prevent damage to the airframe, sensors, and ammunition stores.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="text-4xl text-[#0E4B8C] mb-3">🧠</div>
+                    <h4 class="font-bold text-lg mb-2">Fire Control & Crew</h4>
+                    <p class="text-sm text-gray-600">Managing such a diverse arsenal requires a highly sophisticated, AI-assisted fire control system and a large, specialized crew of weapon operators, placing an unprecedented workload on both humans and software.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="performance" class="mb-20">
+            <h3 class="text-3xl font-bold text-center mb-2">The Price of Power: Performance Impact</h3>
+            <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">Adding hundreds of thousands of pounds of weapons, ammunition, and structural reinforcements has a profound impact on the aircraft's flight characteristics. This table illustrates the significant trade-offs between firepower and performance.</p>
+             <div class="bg-white p-6 rounded-lg shadow-lg overflow-x-auto">
+                <table class="w-full min-w-max text-left">
+                    <thead>
+                        <tr class="border-b border-gray-300">
+                            <th class="p-4 text-sm font-semibold text-gray-500 uppercase">Metric</th>
+                            <th class="p-4 text-sm font-semibold text-gray-500 uppercase">Baseline C-5M</th>
+                            <th class="p-4 text-sm font-semibold text-gray-500 uppercase">Hypothetical AC-5 MOAG</th>
+                            <th class="p-4 text-sm font-semibold text-gray-500 uppercase">Impact</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-gray-200">
+                            <td class="p-4 font-slab">Max Speed</td>
+                            <td class="p-4">~518 mph</td>
+                            <td class="p-4">Reduced</td>
+                            <td class="p-4"><span class="px-3 py-1 text-xs font-semibold text-orange-800 bg-orange-100 rounded-full">Negative</span></td>
+                        </tr>
+                         <tr class="border-b border-gray-200">
+                            <td class="p-4 font-slab">Unrefueled Range</td>
+                            <td class="p-4">~5,524 miles</td>
+                            <td class="p-4">Significantly Reduced</td>
+                            <td class="p-4"><span class="px-3 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">Severe</span></td>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-slab">Takeoff Roll</td>
+                            <td class="p-4">~5,000 ft (Typical)</td>
+                            <td class="p-4">>6,000 ft (at max weight)</td>
+                            <td class="p-4"><span class="px-3 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">Severe</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="strategy" class="mb-20">
+            <h3 class="text-3xl font-bold text-center mb-2">The Doctrine: Standoff Arsenal Plane</h3>
+             <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">Given its immense size and lack of stealth, the AC-5 MOAG is highly vulnerable in modern contested airspace. Its strategic value lies not as a frontline brawler, but as a "force multiplier" operating from relative safety, launching overwhelming firepower based on data from other assets.</p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h4 class="font-bold text-xl text-center mb-4">Hybrid Mission Capability</h4>
+                    <p class="text-sm text-center text-gray-600 mb-6">The AC-5's strength is its ability to blend multiple roles into a single platform, offering unparalleled mission flexibility in permissive environments.</p>
+                    <div class="relative w-full h-64 flex items-center justify-center">
+                        <div class="absolute w-40 h-40 border-4 border-[#5A7D9A] rounded-full" style="top: 0; left: 50%; transform: translateX(-50%);"></div>
+                        <div class="absolute w-40 h-40 border-4 border-[#A0A0A0] rounded-full" style="bottom: 0; left: 25%;"></div>
+                        <div class="absolute w-40 h-40 border-4 border-[#0E4B8C] rounded-full" style="bottom: 0; right: 25%;"></div>
+                        <span class="absolute text-center font-bold" style="top: 60px; left: 50%; transform: translateX(-50%);">Close Air<br>Support</span>
+                        <span class="absolute text-center font-bold" style="bottom: 60px; left: 25%; transform: translateX(-15%);">Standoff<br>Strikes</span>
+                        <span class="absolute text-center font-bold" style="bottom: 60px; right: 25%; transform: translateX(15%);">Area<br>Denial</span>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h4 class="font-bold text-xl text-center mb-4">Networked Warfare Dependency</h4>
+                    <p class="text-sm text-center text-gray-600 mb-6">In high-threat scenarios, the MOAG cannot operate alone. It relies on a robust C4ISR network to receive targeting data from forward assets.</p>
+                    <div class="flex flex-col items-center justify-center h-full space-y-4 p-4">
+                        <div class="text-center">
+                            <p class="font-semibold text-green-600">1. Forward Assets</p>
+                            <p class="text-xs text-gray-500">(Stealth Fighters, Drones)</p>
+                        </div>
+                        <div class="text-2xl text-gray-400">↓</div>
+                        <div class="text-center">
+                            <p class="font-semibold text-blue-600">2. C4ISR Network</p>
+                            <p class="text-xs text-gray-500">(Secure Data Link)</p>
+                        </div>
+                        <div class="text-2xl text-gray-400">↓</div>
+                         <div class="text-center">
+                            <p class="font-semibold text-red-600">3. AC-5 MOAG (Standoff)</p>
+                            <p class="text-xs text-gray-500">(Receives Data & Launches)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="conclusion" class="text-center my-20">
+            <h3 class="text-3xl font-bold text-gray-900">A Fascinating but Flawed Giant</h3>
+            <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">While the AC-5 MOAG remains a compelling thought experiment in overwhelming firepower, the immense engineering, logistical, and strategic hurdles make it an unlikely reality. It serves as the ultimate expression of an "arsenal plane," a concept that pushes the boundaries of air power but highlights the critical balance between raw capability and practical viability.</p>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-8 bg-gray-100 border-t">
+        <p class="text-sm text-gray-500">Interactive dashboard based on the "Hypothetical C-5 Gunship Analysis" report.</p>
+    </footer>
+
+    <script>
+        document.addEventListener
+        (
+            'DOMContentLoaded',
+            function ()
+            {
+                const apiKey = ""; 
+
+                function wrapLabel
+                (
+                    label,
+                    maxWidth
+                )
+                {
+                    if (typeof label !== 'string' || label.length <= maxWidth)
+                    {
+                        return label;
+                    }
+                    const words = label.split(' ');
+                    const lines = [];
+                    let currentLine = '';
+                    for (const word of words)
+                    {
+                        if ((currentLine + word).length > maxWidth && currentLine !== '')
+                        {
+                            lines.push(currentLine.trim());
+                            currentLine = '';
+                        }
+                        currentLine += word + ' ';
+                    }
+                    if (currentLine.trim() !== '')
+                    {
+                        lines.push(currentLine.trim());
+                    }
+                    return lines;
+                }
+
+                const directFireData = 
+                {
+                    rof: 
+                    {
+                        labels: 
+                        [
+                            'M61 Vulcan',
+                            'GAU-2/A Minigun',
+                            'GAU-8/A Avenger',
+                            'GAU-23/A Autocannon',
+                            'L/60 Bofors Cannon'
+                        ].map
+                        (
+                            l => wrapLabel(l, 16)
+                        ),
+                        datasets: 
+                        [
+                            {
+                                label: 'Max Rounds Per Minute',
+                                data: [6600, 6000, 4200, 200, 140],
+                                backgroundColor: '#5A7D9A',
+                            }
+                        ]
+                    },
+                    recoil: 
+                    {
+                        labels: 
+                        [
+                            'GAU-8/A Avenger',
+                            'M102 Howitzer',
+                            'GAU-2/A Minigun'
+                        ].map
+                        (
+                            l => wrapLabel(l, 16)
+                        ),
+                        datasets: 
+                        [
+                            {
+                                label: 'Average Recoil Force (lbs)',
+                                data: [10000, 4950, 150],
+                                backgroundColor: '#0E4B8C',
+                            }
+                        ]
+                    }
+                };
+
+                const infoText = 
+                {
+                    rof: "This chart visualizes the maximum cyclic rate of fire for the primary cannon systems. The Gatling-style weapons are designed for area suppression, capable of firing thousands of rounds per minute.",
+                    recoil: "This chart shows the immense recoil force generated by the heaviest weapons. Managing the 10,000 lbs of force from a single GAU-8 is a primary engineering challenge, let alone three firing at once."
+                };
+
+                const guidedMunitionsData = 
+                {
+                    labels: 
+                    [
+                        'AGM-114 Hellfire',
+                        'AGM-176 Griffin',
+                        'SDB II (StormBreaker)',
+                        'Rapid Dragon (JASSM-ER)'
+                    ].map
+                    (
+                        l => wrapLabel(l, 18)
+                    ),
+                    datasets: 
+                    [
+                        {
+                            label: 'Maximum Operational Range (km)',
+                            data: [8, 20.1, 72, 925],
+                            backgroundColor: 
+                            [
+                                '#A0A0A0',
+                                '#5A7D9A',
+                                '#333D44',
+                                '#0E4B8C'
+                            ],
+                            borderColor: '#F8F7F4',
+                            borderWidth: 2
+                        }
+                    ]
+                };
+
+                const tooltipTitleCallback = 
+                (
+                    tooltipItems
+                ) =>
+                {
+                    const item = tooltipItems[0];
+                    let label = item.chart.data.labels[item.dataIndex];
+                    return Array.isArray(label) ? label.join(' ') : label;
+                };
+
+                const baseChartOptions = 
+                {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: 
+                    {
+                        legend: 
+                        {
+                            display: false
+                        },
+                        tooltip: 
+                        {
+                            callbacks: 
+                            {
+                                title: tooltipTitleCallback
+                            },
+                            backgroundColor: '#333D44',
+                            titleFont: 
+                            {
+                                weight: 'bold'
+                            },
+                            bodyFont: 
+                            {
+                                size: 14
+                            },
+                            padding: 10,
+                            cornerRadius: 4
+                        }
+                    },
+                    scales: 
+                    {
+                        x: 
+                        {
+                            ticks: 
+                            {
+                                color: '#333D44'
+                            },
+                            grid: 
+                            {
+                                display: false
+                            }
+                        },
+                        y: 
+                        {
+                            ticks: 
+                            {
+                                color: '#333D44'
+                            },
+                            grid: 
+                            {
+                                color: '#e5e7eb'
+                            }
+                        }
+                    }
+                };
+                
+                const directFireCtx = document.getElementById('directFireChart').getContext('2d');
+                const directFireChart = new Chart
+                (
+                    directFireCtx,
+                    {
+                        type: 'bar',
+                        data: directFireData.rof,
+                        options: baseChartOptions
+                    }
+                );
+
+                const guidedMunitionsCtx = document.getElementById('guidedMunitionsChart').getContext('2d');
+                const guidedMunitionsChart = new Chart
+                (
+                    guidedMunitionsCtx,
+                    {
+                        type: 'bar',
+                        data: guidedMunitionsData,
+                        options: 
+                        {
+                            ...baseChartOptions,
+                            indexAxis: 'y',
+                            scales: 
+                            {
+                                y: 
+                                {
+                                    ticks: 
+                                    {
+                                        color: '#333D44'
+                                    },
+                                    grid: 
+                                    {
+                                        display: false
+                                    }
+                                },
+                                x: 
+                                {
+                                    ticks: 
+                                    {
+                                        color: '#333D44'
+                                    },
+                                    grid: 
+                                    {
+                                        color: '#e5e7eb'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                );
+
+                let currentDirectFireWeapon = 
+                {
+                    category: "Gatling Cannons",
+                    name: "M61 Vulcan",
+                    detail: "6600 rounds/minute"
+                };
+
+                const filterButtons = document.querySelectorAll('.filter-btn');
+                const directFireInfoEl = document.getElementById('directFireInfo');
+                const generateDirectFireInsightBtn = document.getElementById('generateDirectFireInsight');
+                const directFireInsightDiv = document.getElementById('directFireInsight');
+                const directFireInsightText = document.getElementById('directFireInsightText');
+                const directFireLoader = document.getElementById('directFireLoader');
+
+                const generateGuidedInsightBtn = document.getElementById('generateGuidedInsight');
+                const guidedInsightDiv = document.getElementById('guidedInsight');
+                const guidedInsightText = document.getElementById('guidedInsightText');
+                const guidedLoader = document.getElementById('guidedLoader');
+
+
+                filterButtons.forEach
+                (
+                    button =>
+                    {
+                        button.addEventListener
+                        (
+                            'click',
+                            () =>
+                            {
+                                filterButtons.forEach
+                                (
+                                    btn => btn.classList.remove('active')
+                                );
+                                button.classList.add('active');
+                                
+                                const filter = button.dataset.filter;
+                                directFireChart.data = directFireData[filter];
+                                directFireInfoEl.textContent = infoText[filter];
+                                directFireChart.update();
+
+                                currentDirectFireWeapon.category = button.dataset.weaponCategory;
+                                currentDirectFireWeapon.name = button.dataset.weaponName;
+                                currentDirectFireWeapon.detail = button.dataset.weaponDetail;
+                                directFireInsightDiv.classList.add('hidden'); // Hide previous insight
+                            }
+                        );
+                    }
+                );
+
+                async function generateInsight
+                (
+                    weaponCategory,
+                    weaponName,
+                    weaponDetail,
+                    insightElement,
+                    loaderElement,
+                    buttonElement,
+                    type
+                )
+                {
+                    insightElement.classList.add('hidden');
+                    insightElement.textContent = '';
+                    loaderElement.classList.remove('hidden');
+                    buttonElement.disabled = true;
+
+                    let prompt = '';
+                    if (type === 'direct_fire')
+                    {
+                        prompt = `As a tactical analyst, describe a brief combat scenario where the AC-5 MOAG uses its ${weaponName} (${weaponDetail}). Focus on the weapon's impact in a direct engagement. Keep it concise, 2-3 sentences.`;
+                    }
+                    else if (type === 'guided_munition')
+                    {
+                        prompt = `Describe a brief strategic scenario where the AC-5 MOAG employs the ${weaponName} (${weaponDetail}) against a high-value, fixed target. Focus on the standoff nature of the attack and its strategic relevance. Keep it concise, 2-3 sentences.`;
+                    }
+                    
+                    try
+                    {
+                        let chatHistory = [];
+                        chatHistory.push
+                        (
+                            {
+                                role: "user",
+                                parts: 
+                                [
+                                    {
+                                        text: prompt
+                                    }
+                                ]
+                            }
+                        );
+                        const payload = 
+                        {
+                            contents: chatHistory
+                        };
+                        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                        
+                        const response = await fetch
+                        (
+                            apiUrl,
+                            {
+                                method: 'POST',
+                                headers: 
+                                {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(payload)
+                            }
+                        );
+                        
+                        const result = await response.json();
+
+                        if
+                        (
+                            result.candidates &&
+                            result.candidates.length > 0 &&
+                            result.candidates[0].content &&
+                            result.candidates[0].content.parts &&
+                            result.candidates[0].content.parts.length > 0
+                        )
+                        {
+                            const text = result.candidates[0].content.parts[0].text;
+                            insightElement.textContent = text;
+                            insightElement.classList.remove('hidden');
+                        }
+                        else
+                        {
+                            insightElement.textContent = 'Failed to generate insight. Please try again.';
+                            insightElement.classList.remove('hidden');
+                        }
+                    }
+                    catch (error)
+                    {
+                        console.error('Error calling Gemini API:', error);
+                        insightElement.textContent = 'Error generating insight. Network issue or API error.';
+                        insightElement.classList.remove('hidden');
+                    }
+                    finally
+                    {
+                        loaderElement.classList.add('hidden');
+                        buttonElement.disabled = false;
+                    }
+                }
+
+                generateDirectFireInsightBtn.addEventListener
+                (
+                    'click',
+                    () =>
+                    {
+                        generateInsight
+                        (
+                            currentDirectFireWeapon.category,
+                            currentDirectFireWeapon.name,
+                            currentDirectFireWeapon.detail,
+                            directFireInsightText,
+                            directFireLoader,
+                            generateDirectFireInsightBtn,
+                            'direct_fire'
+                        );
+                    }
+                );
+
+                generateGuidedInsightBtn.addEventListener
+                (
+                    'click',
+                    () =>
+                    {
+                        const weaponCategory = generateGuidedInsightBtn.dataset.weaponCategory;
+                        const weaponName = generateGuidedInsightBtn.dataset.weaponName;
+                        const weaponDetail = generateGuidedInsightBtn.dataset.weaponDetail;
+                        generateInsight
+                        (
+                            weaponCategory,
+                            weaponName,
+                            weaponDetail,
+                            guidedInsightText,
+                            guidedLoader,
+                            generateGuidedInsightBtn,
+                            'guided_munition'
+                        );
+                    }
+                );
+
+                const sections = document.querySelectorAll('section');
+                const navLinks = document.querySelectorAll('.nav-link');
+
+                window.addEventListener
+                (
+                    'scroll',
+                    () =>
+                    {
+                        let current = '';
+                        sections.forEach
+                        (
+                            section =>
+                            {
+                                const sectionTop = section.offsetTop;
+                                if (pageYOffset >= sectionTop - 100)
+                                {
+                                    current = section.getAttribute('id');
+                                }
+                            }
+                        );
+
+                        navLinks.forEach
+                        (
+                            link =>
+                            {
+                                link.classList.remove('active');
+                                if (link.getAttribute('href').includes(current))
+                                {
+                                    link.classList.add('active');
+                                }
+                            }
+                        );
+                    }
+                );
+            }
+        );
+    </script>
+</body>
+</html>
